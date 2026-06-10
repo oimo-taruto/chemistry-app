@@ -113,6 +113,10 @@ def get_stats(student_id: str):
         .select("is_understood, problem_id, problems(unit, question_type)") \
         .eq("student_id", student_id) \
         .execute().data
+    
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
 
     by_unit = {}
     by_type = {}
