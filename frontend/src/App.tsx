@@ -2,14 +2,12 @@ import React from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import PracticePage from "./pages/PracticePage";
-import CollectionPage from "./pages/CollectionPage";
+import ReviewPage from "./pages/ReviewPage";
 import MyPage from "./pages/MyPage";
 
 const tabs = [
   { path: "/", label: "ホーム" },
-  { path: "/practice", label: "問題演習" },
-  { path: "/collection", label: "コレクション" },
-  { path: "/mypage", label: "マイページ" },
+  { path: "/mypage", label: "分析" },
 ];
 
 function TabBar() {
@@ -32,11 +30,12 @@ function TabBar() {
           to={t.path}
           style={{
             flex: 1,
-            padding: "8px 4px",
+            padding: "10px 4px",
             textAlign: "center",
-            fontSize: 12,
+            fontSize: 13,
             textDecoration: "none",
-            color: location.pathname === t.path ? "#2b7a4b" : "#666",
+            color: location.pathname === t.path ? "#2b7a4b" : "#888",
+            fontWeight: location.pathname === t.path ? "bold" : "normal",
           }}
         >
           {t.label}
@@ -48,11 +47,11 @@ function TabBar() {
 
 export default function App() {
   return (
-    <div style={{ paddingBottom: 56 }}>
+    <div style={{ paddingBottom: 60 }}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/practice" element={<PracticePage />} />
-        <Route path="/collection" element={<CollectionPage />} />
+        <Route path="/review" element={<ReviewPage />} />
         <Route path="/mypage" element={<MyPage />} />
       </Routes>
       <TabBar />
