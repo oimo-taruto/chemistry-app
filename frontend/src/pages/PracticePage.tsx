@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useStudentId } from "../hooks/useStudentId";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,6 +14,8 @@ type Problem = {
 };
 
 export default function PracticePage() {
+  const studentId = useStudentId();
+
   const [problem, setProblem] = useState<Problem | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,11 +30,11 @@ export default function PracticePage() {
     setError(null);
     setShowAnswer(false);
     try {
-      const res = await fetch(`${API_BASE}/api/problems/random`);
+      const res = await fetch(`${API_BASE}/api/problems/random${studentId ? `?student_id=${studentId}` : ""}`);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
-      const data = await res.json();
+      const data = (await res.json()) as Problem;
       setProblem(data);
     } catch (e: any) {
       setError(e.message ?? "エラーが発生しました");
@@ -40,19 +43,49 @@ export default function PracticePage() {
     }
   }
 
+  async function sendAnswer(isUnderstood: boolean) {
+    if (!API_BASE) return;
+    if (!studentId || !problem) return;
+
+    try {
+      await fetch(`${API_BASE}/api/answers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          student_id: studentId,
+          problem_id: problem.id,
+          is_understood: isUnderstood,
+          reason_tag: null,
+          memo: null,
+        }),
+      });
+    } catch {
+      // 今は失敗しても無視（あとでトーストなどを足してもよい）
+    }
+  }
+
   useEffect(() => {
     fetchProblem();
-  }, []);
+  }, [studentId]);
 
   return (
     <main style={{ padding: 16 }}>
       <h2>問題演習</h2>
+
+      {!studentId && (
+        <p style={{ fontSize: 12, color: "#666" }}>
+          学習者IDを準備しています…
+        </p>
+      )}
+
       {loading && <p>読み込み中...</p>}
+
       {error && (
         <p style={{ color: "red", fontSize: 14 }}>
           エラー: {error}
         </p>
       )}
+
       {problem && !loading && (
         <>
           <p style={{ marginTop: 16, fontSize: 12, color: "#666" }}>
@@ -104,7 +137,10 @@ export default function PracticePage() {
                     background: "#2b7a4b",
                     color: "#fff",
                   }}
-                  onClick={fetchProblem}
+                  onClick={async () => {
+                    await sendAnswer(true);
+                    fetchProblem();
+                  }}
                 >
                   わかった → 次へ
                 </button>
@@ -117,7 +153,10 @@ export default function PracticePage() {
                     background: "#e57373",
                     color: "#fff",
                   }}
-                  onClick={fetchProblem}
+                  onClick={async () => {
+                    await sendAnswer(false);
+                    fetchProblem();
+                  }}
                 >
                   わからなかった → 次へ
                 </button>
