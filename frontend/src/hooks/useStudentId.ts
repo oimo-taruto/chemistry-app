@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 const STORAGE_KEY = "chemistry_student_id";
 
 function generateUuid() {
-  // 簡易版。あとで必要ならちゃんとしたUUID生成に差し替え可。
   return crypto.randomUUID();
 }
 
